@@ -1,0 +1,3 @@
+-- query_id: 7527000
+-- source: https://dune.com/queries/7527000
+-- Placeholder: run scripts/sync_queries.py (needs DUNE_API_KEY) to pull the real SQL from Dune.
