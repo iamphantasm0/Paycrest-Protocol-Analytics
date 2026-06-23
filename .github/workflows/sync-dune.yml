@@ -1,0 +1,42 @@
+name: Sync Dune queries
+
+on:
+  schedule:
+    - cron: "0 6 * * *" # daily at 06:00 UTC
+  workflow_dispatch: {}
+  push:
+    branches: [main]
+    paths:
+      - queries.yml
+      - scripts/sync_queries.py
+      - .github/workflows/sync-dune.yml
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Pull query SQL from Dune
+        env:
+          DUNE_API_KEY: ${{ secrets.DUNE_API_KEY }}
+        run: python scripts/sync_queries.py
+
+      - name: Commit any changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if [ -n "$(git status --porcelain queries)" ]; then
+            git add queries
+            git commit -m "Sync Dune query SQL"
+            git push
+          else
+            echo "No query changes to commit."
+          fi
